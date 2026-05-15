@@ -1,4 +1,4 @@
-# 02_install — установка с нуля
+# Windows install
 
 Эта папка содержит демонстрационные скрипты установки окружения после очистки.
 
@@ -15,13 +15,13 @@
 Сначала dry-run:
 
 ```powershell
-.\02_install\01_install_dev_environment_demo.ps1
+.\platforms\windows\install\01_install_dev_environment_demo.ps1
 ```
 
 Реальная установка:
 
 ```powershell
-.\02_install\01_install_dev_environment_demo.ps1 -Execute
+.\platforms\windows\install\01_install_dev_environment_demo.ps1 -Execute
 ```
 
 ## SSH-ключ для демонстрации
@@ -37,4 +37,4 @@
 ## Что дальше?
 
 После завершения автоматической установки переходи к **ручной донастройке** (аккаунты, подписки, ключи):
-[MANUAL_SETUP_GUIDE.md](../MANUAL_SETUP_GUIDE.md)
+[../../../docs/windows/manual-setup-guide.md](../../../docs/windows/manual-setup-guide.md)

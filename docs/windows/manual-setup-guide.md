@@ -1,6 +1,6 @@
 # Ручной гайд по настройке окружения для AI Camp
 # Версия: финальная, 2026-05-15
-# Источник ссылок: sources.txt
+# Источник ссылок: docs/research/sources.md
 
 Этот гайд — твоя единственная точка входа после запуска скриптов.
 Иди по шагам сверху вниз. Не пропускай шаги.
@@ -33,21 +33,21 @@
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 
 # Шаг 0a: базовые инструменты (Node.js, Git, Docker Desktop, Python)
-.\02_install\01_install_dev_environment_demo.ps1 -Execute
+.\platforms\windows\install\01_install_dev_environment_demo.ps1 -Execute
 ```
 
 > **ВАЖНО**: После установки Docker Desktop — закрой и открой PowerShell заново. Если Docker попросил перезагрузку — перезагрузись и вернись сюда.
 
 ```powershell
 # Шаг 0b: AI-инструменты (Claude Code CLI, Claude Desktop, yc CLI)
-.\02_install\04_install_ai_tools.ps1 -Execute
+.\platforms\windows\install\04_install_ai_tools.ps1 -Execute
 ```
 
 > **ВАЖНО**: Закрой и открой PowerShell заново (нужно для yc и Claude в PATH).
 
 ```powershell
 # Шаг 0c: SSH-ключ для Яндекс Облака
-.\02_install\05_ssh_key.ps1 -Execute
+.\platforms\windows\install\05_ssh_key.ps1 -Execute
 
 # Шаг 0d: Переустановка Gemini CLI (был в npm-global, удалён вместе с ним)
 npm install -g @google/gemini-cli
@@ -227,7 +227,7 @@ yc compute ssh-key create --name ai-camp-key --public-key-path $env:USERPROFILE\
     Remove-Item "$env:USERPROFILE\.ssh\ai_camp_demo_key", "$env:USERPROFILE\.ssh\ai_camp_demo_key.pub" -Force
 
   То же самое через скрипт (делает ровно эти три команды):
-    .\02_install\02_demo_ssh_key_create_and_remove.ps1 -Execute
+    .\platforms\windows\install\02_demo_ssh_key_create_and_remove.ps1 -Execute
 
   ВАЖНО: демо-ключ удаляется сразу. Для Яндекс Облака используется id_ed25519 из шага 0c.
 
@@ -264,7 +264,7 @@ API-ключи: [dashboard.exa.ai/api-keys](https://dashboard.exa.ai/api-keys) -
 Открой PowerShell и запусти скрипт проверки:
 
 ```powershell
-.\02_install\03_final_check.ps1
+.\platforms\windows\install\03_final_check.ps1
 ```
 
 Дополнительные ручные проверки:

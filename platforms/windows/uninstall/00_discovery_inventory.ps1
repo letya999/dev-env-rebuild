@@ -109,13 +109,53 @@ function Get-ServiceChecks {
     $res
 }
 
+function Get-NpmPrefixSafe {
+    try {
+        $prefix = (& npm config get prefix 2>$null)
+        if ($prefix) { return $prefix }
+    } catch {}
+    return "not found"
+}
+
+function Get-ProjectRootOverview {
+    $candidates = @(
+        "$env:USERPROFILE\a_projects",
+        "$env:USERPROFILE\projects",
+        "$env:USERPROFILE\Projects",
+        "$env:USERPROFILE\Desktop\projects",
+        "$env:USERPROFILE\Documents\projects"
+    )
+    foreach ($p in $candidates) {
+        if (Test-Path -LiteralPath $p) {
+            $children = @(Get-ChildItem -LiteralPath $p -Directory -Force -ErrorAction SilentlyContinue |
+                Select-Object -First 30 -ExpandProperty Name)
+            [pscustomobject]@{
+                Path = $p
+                Exists = $true
+                DirectoryCountSample = $children.Count
+                SampleDirectories = @($children)
+            }
+        } else {
+            [pscustomobject]@{
+                Path = $p
+                Exists = $false
+                DirectoryCountSample = 0
+                SampleDirectories = @()
+            }
+        }
+    }
+}
+
 $commands = @(
     (Get-CommandInfoSafe "node" @("-v", "--version")),
     (Get-CommandInfoSafe "npm" @("-v", "--version")),
+    (Get-CommandInfoSafe "npx" @("-v", "--version")),
     (Get-CommandInfoSafe "yarn" @("-v", "--version")),
     (Get-CommandInfoSafe "pnpm" @("-v", "--version")),
     (Get-CommandInfoSafe "bun" @("-v", "--version")),
     (Get-CommandInfoSafe "python" @("--version")),
+    (Get-CommandInfoSafe "py" @("--version")),
+    (Get-CommandInfoSafe "pip" @("--version")),
     (Get-CommandInfoSafe "git" @("--version")),
     (Get-CommandInfoSafe "gh" @("--version")),
     (Get-CommandInfoSafe "docker" @("--version")),
@@ -152,6 +192,8 @@ $inventory = [pscustomobject]@{
     machinePath = ([Environment]::GetEnvironmentVariable("Path", "Machine") -split ";" | Where-Object { $_ })
     interestingEnv = @($envInteresting | ForEach-Object { [pscustomobject]@{ Name=$_.Name; Value=$_.Value } })
     existingPaths = @(Get-ExistingPathReport)
+    npmGlobalPrefix = (Get-NpmPrefixSafe)
+    projectRoots = @(Get-ProjectRootOverview)
     registry = @(Get-RegistryChecks)
     services = @(Get-ServiceChecks)
 }
@@ -185,6 +227,14 @@ $md += ""
 $md += "## Existing Paths"
 foreach ($p in $inventory.existingPaths | Where-Object { $_.Exists }) { $md += "- $($p.Path)" }
 $md += ""
+$md += "## npm global prefix"
+$md += "$($inventory.npmGlobalPrefix)"
+$md += ""
+$md += "## Project Root Overview"
+foreach ($p in $inventory.projectRoots) {
+    $md += "- $($p.Path): $(if ($p.Exists) { "exists; sample directories: $($p.SampleDirectories -join ', ')" } else { "not found" })"
+}
+$md += ""
 $md += "## Relevant Env Vars"
 foreach ($e in $inventory.interestingEnv) { $md += "- $($e.Name) = $($e.Value)" }
 
@@ -193,19 +243,19 @@ $md | Set-Content -Path $InventoryMd -Encoding UTF8
 if (-not (Test-Path $LocalPlan)) {
     $npmPrefixDetected = try { (& npm config get prefix 2>$null) } catch { "not found" }
     @(
-        "# Local Adaptation Plan",
+        "# Локальный план адаптации",
         "",
         "Generated: $((Get-Date).ToString('s'))",
         "",
-        "## Instruction for Agent",
-        "This file should be filled by the agent (Gemini/Codex) after analyzing inventory.md.",
-        "Describe here: what is non-standard, which paths differ from defaults, what needs to be adapted.",
+        "## Инструкция для агента",
+        "Заполни этот файл после анализа inventory.md и inventory.json.",
+        "Опиши реальные установленные инструменты, нестандартные пути, npm global prefix, PATH-записи, WSL-дистрибутивы и безопасный порядок удаления.",
         "",
         "## npm global prefix",
         "npm config get prefix: $npmPrefixDetected",
         "",
-        "## Tools Status",
-        "Fill based on inventory.md"
+        "## Статус инструментов",
+        "Заполнить на основе inventory.md"
     ) | Set-Content -Path $LocalPlan -Encoding UTF8
     Write-Host "local_plan.md created/updated: $LocalPlan" -ForegroundColor Green
 }
