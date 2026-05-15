@@ -2,6 +2,11 @@
 
 set -euo pipefail
 
+if [ "$(uname -s)" != "Darwin" ]; then
+  printf 'ERROR: this script is intended for macOS only.\n' >&2
+  exit 1
+fi
+
 DRY_RUN=1
 KEY_PATH="$HOME/.ssh/id_ed25519"
 

@@ -7,9 +7,19 @@ Run commands from the repository root.
 
 ## Flow
 
+Dry-run first:
+
 ```bash
 ./platforms/macos/uninstall/00_discovery_inventory.sh
 ./platforms/macos/uninstall/01_uninstall_dev_environment.sh
+./platforms/macos/install/01_install_dev_environment.sh
+./platforms/macos/install/02_install_ai_tools.sh
+./platforms/macos/install/03_ssh_key.sh
+```
+
+Execute only after reviewing generated `_state` files and dry-run output:
+
+```bash
 ./platforms/macos/uninstall/01_uninstall_dev_environment.sh --execute
 ./platforms/macos/uninstall/02_post_uninstall_check.sh
 

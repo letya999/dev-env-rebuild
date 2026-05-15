@@ -16,6 +16,12 @@ Research date: 2026-05-15.
   `C:\ProgramData\Docker`, `C:\ProgramData\DockerDesktop`,
   `C:\Program Files\Docker`, user AppData Docker folders, and `~\.docker`:
   https://docs.docker.com/desktop/uninstall/
+- WinGet's community manifest repository currently contains exact package
+  identifiers used by the scripts: `OpenJS.NodeJS.LTS`, `Git.Git`,
+  `Docker.DockerDesktop`, `Python.Python.3.14`, `Python.Launcher`,
+  `Anthropic.ClaudeCode`, `Anthropic.Claude`, `OpenAI.Codex`,
+  `GitHub.cli`, and `Oven-sh.Bun`:
+  https://github.com/microsoft/winget-pkgs
 
 ## macOS
 
@@ -26,6 +32,11 @@ Research date: 2026-05-15.
 - Homebrew's FAQ points to the official uninstall script and notes
   `brew uninstall --force <formula>` when all versions must be removed:
   https://docs.brew.sh/FAQ.html
+- Homebrew's cask docs support `brew uninstall --zap --force <cask>` for more
+  complete cask cleanup. This project intentionally uses conservative cask
+  uninstall plus explicit vendor-documented residual paths rather than broad
+  `--zap` cleanup:
+  https://docs.brew.sh/Cask-Cookbook
 - Docker Desktop for Mac can be uninstalled via
   `/Applications/Docker.app/Contents/MacOS/uninstall`; Docker documents
   leftover `~/Library/Group Containers/group.com.docker` and `~/.docker`:
@@ -40,10 +51,18 @@ Research date: 2026-05-15.
   for `docker-ce`, `docker-ce-cli`, `containerd.io`,
   `docker-buildx-plugin`, and `docker-compose-plugin`:
   https://docs.docker.com/engine/install/ubuntu/
+- Docker's documented apt repository signing-key fingerprint is
+  `9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88`; Ubuntu install scripts
+  verify this fingerprint before trusting the repository key:
+  https://docs.docker.com/engine/install/ubuntu/
 - Docker Engine uninstall requires `apt purge` of Docker packages; Docker data
   under `/var/lib/docker` and `/var/lib/containerd` is not removed
   automatically:
   https://docs.docker.com/engine/install/ubuntu/
+- Docker Desktop for Ubuntu cleanup also documents `$HOME/.docker/desktop`,
+  `/usr/local/bin/com.docker.cli`, `docker-desktop` purge, and manual cleanup
+  of `credsStore` / `currentContext` in `$HOME/.docker/config.json`:
+  https://docs.docker.com/desktop/uninstall/
 
 ## Node and AI CLIs
 
@@ -51,11 +70,16 @@ Research date: 2026-05-15.
   manager and documents `npm install -g <package_name>` for global CLIs:
   https://docs.npmjs.com/downloading-and-installing-node-js-and-npm/
 - `nvm` supports macOS and Linux and provides `nvm install --lts` for the
-  latest LTS Node.js line:
+  latest LTS Node.js line. GitHub currently reports the latest release as
+  `v0.40.4`:
   https://github.com/nvm-sh/nvm
 - Claude Code supports macOS 13+, Windows 10 1809+, Ubuntu 20.04+, and Debian
   10+. Official setup documents native installers, Homebrew, WinGet, apt, and
   npm installation methods:
+  https://code.claude.com/docs/en/setup
+- Claude Code apt setup publishes a signed repository and documents the GPG
+  fingerprint `31DD DE24 DDFA B679 F42D 7BD2 BAA9 29FF 1A7E CACE`; Ubuntu
+  install scripts verify this fingerprint before installing `claude-code`:
   https://code.claude.com/docs/en/setup
 - Codex CLI official docs install with `npm i -g @openai/codex`; first run
   prompts for ChatGPT or API-key authentication:
@@ -67,5 +91,11 @@ Research date: 2026-05-15.
   https://google-gemini.github.io/gemini-cli/docs/get-started/
 - Yandex Cloud CLI official quickstart uses
   `curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash`
-  on Linux/macOS and `install.ps1` on Windows:
-  https://yandex.cloud/en/docs/cli/quickstart
+  on Linux/macOS and `install.ps1` on Windows. Its install options include
+  `-a` to automatically modify the default shell rc file with PATH and
+  completion setup:
+  https://yandex.cloud/en/docs/cli/operations/install-cli
+- The same Yandex Cloud CLI docs document scriptless Windows installation by
+  downloading `yc_windows_amd64.zip` or `yc_windows_386.zip`, unpacking
+  `yc.exe`, and adding that directory to User `PATH`; the Windows install
+  script uses that non-interactive path to avoid the `install.ps1` PATH prompt.

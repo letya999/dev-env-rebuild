@@ -22,7 +22,7 @@
 ПОРЯДОК УСТАНОВКИ (кратко):
   1.  PowerShell + winget + OpenSSH  (системная подготовка)
   2.  Node.js LTS                    (основа для CLI-инструментов)
-  3.  Python 3.12
+  3.  Python 3.14
   4.  Git for Windows + git config
   5.  Docker Desktop                 (потребует перезагрузку!)
   6.  Claude Desktop + Claude Code CLI + подписка
@@ -80,7 +80,7 @@ Node.js нужен первым — от него зависят Claude Code CLI
 
 ### Через winget (рекомендуется):
 
-  winget install --id OpenJS.NodeJS.LTS --accept-package-agreements --accept-source-agreements
+  winget install --id OpenJS.NodeJS.LTS -e --source winget --accept-package-agreements --accept-source-agreements
 
 ### Через браузер (если winget не работает):
 
@@ -98,16 +98,16 @@ Node.js нужен первым — от него зависят Claude Code CLI
   npx -v
 
 
-## Шаг 3: Python 3.12
+## Шаг 3: Python 3.14
 
 ### Через winget:
 
-  winget install --id Python.Python.3.12 --accept-package-agreements --accept-source-agreements
+  winget install --id Python.Python.3.14 -e --source winget --accept-package-agreements --accept-source-agreements
 
 ### Через браузер:
 
   1. Открой: https://www.python.org/downloads/windows/
-  2. Нажми на "Python 3.12.x" → скачай "Windows installer (64-bit)"
+  2. Нажми на "Python 3.14.x" → скачай "Windows installer (64-bit)"
   3. Запусти установщик
   4. ВАЖНО: поставь галочку "Add Python.exe to PATH" внизу первого экрана
   5. Нажми "Install Now"
@@ -116,7 +116,7 @@ Node.js нужен первым — от него зависят Claude Code CLI
 !! После установки ЗАКРОЙ и ОТКРОЙ PowerShell заново.
 
 Проверка:
-  python --version    # должно быть Python 3.12.x
+  python --version    # должно быть Python 3.14.x
   pip --version
 
 
@@ -124,7 +124,7 @@ Node.js нужен первым — от него зависят Claude Code CLI
 
 ### Через winget:
 
-  winget install --id Git.Git --accept-package-agreements --accept-source-agreements
+  winget install --id Git.Git -e --source winget --accept-package-agreements --accept-source-agreements
 
 ### Через браузер:
 
@@ -172,7 +172,7 @@ Node.js нужен первым — от него зависят Claude Code CLI
 ### 5.2 Установить Docker Desktop
 
   Через winget:
-    winget install --id Docker.DockerDesktop --accept-package-agreements --accept-source-agreements
+    winget install --id Docker.DockerDesktop -e --source winget --accept-package-agreements --accept-source-agreements
 
   Через браузер:
     1. Открой: https://www.docker.com/products/docker-desktop/
@@ -218,7 +218,7 @@ Node.js нужен первым — от него зависят Claude Code CLI
 ### 6.2 Установить Claude Desktop
 
   Через winget:
-    winget install --id Anthropic.Claude --accept-package-agreements --accept-source-agreements
+    winget install --id Anthropic.Claude -e --source winget --accept-package-agreements --accept-source-agreements
 
   Через браузер:
     1. Открой: https://claude.com/download
@@ -234,7 +234,7 @@ Node.js нужен первым — от него зависят Claude Code CLI
 ### 6.3 Установить Claude Code CLI
 
   Вариант A — winget (рекомендуется):
-    winget install --id Anthropic.ClaudeCode --accept-package-agreements --accept-source-agreements
+    winget install --id Anthropic.ClaudeCode -e --source winget --accept-package-agreements --accept-source-agreements
 
   Вариант B — npm (если winget не сработал):
     npm install -g @anthropic-ai/claude-code
@@ -409,9 +409,17 @@ Node.js нужен первым — от него зависят Claude Code CLI
 
 ### 11.2 Установить yc CLI
 
-  !! winget НЕ поддерживает yc CLI. Только через PowerShell.
+  !! winget НЕ поддерживает yc CLI.
 
-  В PowerShell от администратора выполни:
+  Неинтерактивный вариант без install.ps1 prompt:
+
+    $dir = "$env:USERPROFILE\yandex-cloud\bin"
+    New-Item -ItemType Directory -Path $dir -Force | Out-Null
+    Invoke-WebRequest "https://storage.yandexcloud.net/yandexcloud-yc/release/yc_windows_amd64.zip" -OutFile "$env:TEMP\yc_windows_amd64.zip"
+    Expand-Archive "$env:TEMP\yc_windows_amd64.zip" -DestinationPath $dir -Force
+    [Environment]::SetEnvironmentVariable("Path", "$([Environment]::GetEnvironmentVariable('Path', 'User'));$dir", "User")
+
+  Интерактивная альтернатива через официальный PowerShell-скрипт:
 
     iex (New-Object System.Net.WebClient).DownloadString('https://storage.yandexcloud.net/yandexcloud-yc/install.ps1')
 
@@ -524,7 +532,7 @@ Node.js нужен первым — от него зависят Claude Code CLI
   # Версии инструментов:
   node -v               # v22.x или v24.x
   npm -v                # 10+
-  python --version      # Python 3.12.x
+  python --version      # Python 3.14.x
   git --version
   docker --version
   claude --version

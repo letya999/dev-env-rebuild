@@ -4,7 +4,7 @@ set -euo pipefail
 
 DRY_RUN=1
 INSTALL_HOMEBREW=0
-NVM_INSTALL_VERSION="${NVM_INSTALL_VERSION:-v0.40.3}"
+NVM_INSTALL_VERSION="${NVM_INSTALL_VERSION:-v0.40.4}"
 
 for arg in "$@"; do
   case "$arg" in
@@ -57,7 +57,7 @@ else
 fi
 
 step 'Base packages'
-run_shell 'brew install git python@3.12' "$brew_env; brew install git python@3.12"
+run_shell 'brew install git python' "$brew_env; brew install git python"
 run_shell 'brew install --cask docker' "$brew_env; brew install --cask docker"
 
 step 'Node.js LTS through nvm'

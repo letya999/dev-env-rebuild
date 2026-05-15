@@ -4,10 +4,9 @@ $DryRun = -not $Execute
 . (Join-Path $PSScriptRoot "..\lib.ps1")
 
 Step "Git & GitHub CLI Uninstallation"
-WingetUninstall "Git" -DryRun:$DryRun
-WingetUninstall "Git Credential Manager" -DryRun:$DryRun
-WingetUninstall "GitHub CLI" -DryRun:$DryRun
+WingetUninstallById "Git.Git" -DryRun:$DryRun
+WingetUninstallById "GitHub.cli" -DryRun:$DryRun
+WingetUninstallByName "Git Credential Manager" -DryRun:$DryRun
 Remove-PathSafe "C:\Program Files\Git" -DryRun:$DryRun
-Remove-PathSafe "$env:LOCALAPPDATA\GitCredentialManager" -DryRun:$DryRun
 Remove-PathSafe "$env:LOCALAPPDATA\GitHub CLI" -DryRun:$DryRun
-Run "Remove .gitconfig" { Remove-Item "$env:USERPROFILE\.gitconfig" -Force -ErrorAction SilentlyContinue } -DryRun:$DryRun
+Write-Host "Git user config and credential stores are preserved: ~/.gitconfig, ~/.git-credentials, GitCredentialManager data." -ForegroundColor Gray

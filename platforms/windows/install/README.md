@@ -8,6 +8,7 @@
 - Git;
 - Docker Desktop;
 - Python;
+- Claude Desktop / Claude Code CLI and yc CLI via `04_install_ai_tools.ps1`;
 - опционально Codex CLI после установки Node.js.
 
 ## Как запускать
@@ -24,15 +25,31 @@
 .\platforms\windows\install\01_install_dev_environment_demo.ps1 -Execute
 ```
 
-## SSH-ключ для демонстрации
+AI tools:
 
-Существующие ключи не трогаются. Скрипт создаёт отдельный временный ключ:
+```powershell
+.\platforms\windows\install\04_install_ai_tools.ps1
+.\platforms\windows\install\04_install_ai_tools.ps1 -Execute
+```
+
+## SSH keys
+
+Существующие ключи не трогаются.
+
+Для постоянного ключа `id_ed25519`, который нужен после установки:
+
+```powershell
+.\platforms\windows\install\05_ssh_key.ps1
+.\platforms\windows\install\05_ssh_key.ps1 -Execute
+```
+
+Для отдельной демонстрации создания и удаления временного ключа есть скрипт:
 
 ```text
 %USERPROFILE%\.ssh\ai_camp_demo_key
 ```
 
-Потом показывает публичную часть `.pub` и сразу удаляет оба файла демо-ключа.
+Он показывает публичную часть `.pub` и сразу удаляет оба файла демо-ключа.
 
 ## Что дальше?
 

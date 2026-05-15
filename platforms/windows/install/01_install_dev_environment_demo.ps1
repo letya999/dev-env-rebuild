@@ -23,8 +23,14 @@ function Run($Command, [scriptblock]$Action) {
     }
 }
 function WingetInstall($Id, $Name) {
-    Run "winget install --id $Id ($Name)" {
-        winget install --id $Id --silent --accept-package-agreements --accept-source-agreements
+    Run "winget install --id $Id -e --source winget ($Name)" {
+        if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+            throw "winget не найден. Установи/обнови App Installer из Microsoft Store."
+        }
+        winget install --id "$Id" -e --source winget --silent --accept-package-agreements --accept-source-agreements --disable-interactivity
+        if ($LASTEXITCODE -ne 0) {
+            throw "winget install failed for $Id with exit code $LASTEXITCODE"
+        }
     }
 }
 
@@ -44,7 +50,7 @@ WingetInstall "Docker.DockerDesktop" "Docker Desktop"
 Write-Host "После установки Docker может понадобиться перезагрузка и включение WSL2/VirtualMachinePlatform." -ForegroundColor Yellow
 
 Step "Установка Python"
-WingetInstall "Python.Python.3.12" "Python 3.12"
+WingetInstall "Python.Python.3.14" "Python 3.14"
 
 if ($InstallCodex) {
     Step "Опциональная установка Codex CLI после Node.js"

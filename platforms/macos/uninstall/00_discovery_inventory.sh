@@ -5,6 +5,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLATFORM_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 STATE_DIR="$PLATFORM_ROOT/_state"
+
+if [ "$(uname -s)" != "Darwin" ]; then
+  printf 'ERROR: this discovery script is macOS-specific.\n' >&2
+  exit 1
+fi
+
 mkdir -p "$STATE_DIR"
 
 INVENTORY_MD="$STATE_DIR/inventory.md"
@@ -23,19 +29,22 @@ command_paths() {
 command_version() {
   local cmd="$1"
   shift
+  local tmp
+  tmp="$(mktemp "${TMPDIR:-/tmp}/dev-env-version.XXXXXX")"
   if ! command -v "$cmd" >/dev/null 2>&1; then
+    rm -f "$tmp"
     printf 'not found'
     return 0
   fi
   local arg
   for arg in "$@"; do
-    if "$cmd" "$arg" >/tmp/dev-env-version.$$ 2>&1; then
-      head -n 3 /tmp/dev-env-version.$$ | tr '\n' ' '
-      rm -f /tmp/dev-env-version.$$
+    if "$cmd" "$arg" >"$tmp" 2>&1; then
+      head -n 3 "$tmp" | tr '\n' ' '
+      rm -f "$tmp"
       return 0
     fi
   done
-  rm -f /tmp/dev-env-version.$$
+  rm -f "$tmp"
   printf 'installed, version unavailable'
 }
 

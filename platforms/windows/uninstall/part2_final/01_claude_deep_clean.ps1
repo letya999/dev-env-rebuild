@@ -4,12 +4,10 @@ $DryRun = -not $Execute
 . (Join-Path $PSScriptRoot "..\lib.ps1")
 
 Step "Claude Desktop (GUI app) Uninstall"
-WingetUninstall "Claude" -DryRun:$DryRun
+WingetUninstallById "Anthropic.Claude" -DryRun:$DryRun
 
 Step "Claude Code CLI — winget uninstall (если установлен через winget)"
-Run "winget uninstall Anthropic.ClaudeCode" {
-    winget uninstall --id Anthropic.ClaudeCode --silent --accept-source-agreements 2>$null
-} -DryRun:$DryRun
+WingetUninstallById "Anthropic.ClaudeCode" -DryRun:$DryRun
 
 Step "Claude Code CLI — удаление бинарника PS1-инсталлера (~/.local/bin)"
 Remove-PathSafe "$env:USERPROFILE\.local\bin\claude.exe" -DryRun:$DryRun
