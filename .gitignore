@@ -1,0 +1,50 @@
+# Сгенерированные файлы инвентаризации (содержат данные конкретной машины)
+_state/
+
+# Секреты и окружение
+.env
+*.env
+*.env.local
+secrets.ps1
+secrets.txt
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.npm/
+
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Редакторы
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# PDF-памятки (бинарные файлы, не в репо)
+*.pdf
+
+# Временные файлы PowerShell
+*.ps1.bak
+*.tmp
+
+# Логи
+*.log
+logs/
