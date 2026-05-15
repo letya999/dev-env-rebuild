@@ -35,7 +35,8 @@ Generated machine inventory lives under `platforms/<os>/_state/` and is ignored.
 - Discovery runs before destructive steps.
 - Destructive scripts are dry-run by default.
 - Windows uses `-Execute`; macOS and Ubuntu use `--execute`.
-- Project directories, `.git` directories, existing SSH keys, and AI config
+- Project directories, `.git` directories, existing SSH keys, Git
+  config/credential stores, secret environment variables, and AI config
   directories (`~/.claude`, `~/.codex`, `~/.gemini`) are not removed
   automatically.
 - Node/npm removal is last in destructive flows because AI CLIs often depend on
@@ -112,6 +113,15 @@ Manual Windows guide: [docs/windows/manual-setup-guide.md](docs/windows/manual-s
 ```
 
 Ubuntu intentionally does not purge the OS-critical base `python3` runtime.
+
+## Validation
+
+Pull requests run `.github/workflows/platform-validation.yml` on native GitHub
+Actions runners:
+
+- Ubuntu: Bash syntax, shellcheck, discovery, uninstall/install/AI/SSH dry-runs.
+- macOS: Bash syntax, shellcheck, discovery, uninstall/install/AI/SSH dry-runs.
+- Windows: PowerShell parser validation, discovery, uninstall/install dry-runs.
 
 ## References
 

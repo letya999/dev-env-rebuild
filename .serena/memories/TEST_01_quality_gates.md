@@ -1,6 +1,6 @@
 <!-- Memory Metadata
 Last updated: 2026-05-15
-Last commit: 0b4d41c fix: harden platform environment scripts
+Last commit: 486a0c3 ci: validate platform scripts
 Scope: platforms/macos, platforms/ubuntu, platforms/windows, git diff checks
 Area: TEST
 -->
@@ -16,6 +16,7 @@ This memory records the verification commands that apply after changes to this s
 - `CONTRIBUTING.md`: dry-run and script safety expectations.
 - `docs/architecture.md`: lifecycle, execute flags, and safety boundaries.
 - `docs/research/os-tooling-research.md`: source-backed package-manager and installer facts.
+- `.github/workflows/platform-validation.yml`: native GitHub Actions validation for Ubuntu, macOS, and Windows.
 - `platforms/macos/**/*.sh`: macOS shell scripts.
 - `platforms/ubuntu/**/*.sh`: Ubuntu shell scripts.
 - `platforms/windows/**/*.ps1`: Windows PowerShell scripts.
@@ -31,7 +32,7 @@ This memory records the verification commands that apply after changes to this s
 
 ## Current Behavior
 
-The repository has no application test suite. Verification is script syntax, shell linting, diff hygiene, stale-reference searches, reviewer/static audits, and safe dry-run execution where the host OS matches the target platform or where macOS dry-run can be simulated without executing destructive commands.
+The repository has no application test suite. Verification is script syntax, shell linting, diff hygiene, stale-reference searches, reviewer/static audits, local safe dry-run execution, and GitHub Actions native runner validation for Ubuntu, macOS, and Windows.
 
 ## Contracts And Data
 
@@ -39,7 +40,8 @@ The repository has no application test suite. Verification is script syntax, she
 - Dry-run commands must not require elevated permissions or mutate the machine.
 - Generated `_state/` output is ignored and should not be staged.
 - PowerShell runtime validation must be reported as blocked if neither `pwsh` nor `powershell` is available.
-- Windows `.ps1` scripts should still be reviewed statically for exact WinGet IDs, `-Execute` behavior, and secret/config preservation when PowerShell runtime validation is blocked.
+- Windows `.ps1` scripts should still be reviewed statically for exact WinGet IDs, `-Execute` behavior, and secret/config preservation when local PowerShell runtime validation is blocked.
+- PRs to `main` run `.github/workflows/platform-validation.yml` on native GitHub runners: Ubuntu dry-run, macOS dry-run, and Windows PowerShell parser plus dry-run.
 
 ## Invariants
 
@@ -59,7 +61,13 @@ The repository has no application test suite. Verification is script syntax, she
 - Static stale-risk search: `rg` for removed config deletion, secret env deletion, stale package versions, hardcoded user paths, and TODO/HACK markers.
 - `command -v pwsh || command -v powershell`: checks whether Windows PowerShell validation can be run from the current host.
 
+## GitHub Actions Gates
+
+- Ubuntu job: installs shellcheck, runs Bash syntax, shellcheck, Ubuntu discovery, uninstall dry-run, install dry-run, AI tools dry-run, and SSH dry-run.
+- macOS job: installs shellcheck with Homebrew, runs Bash syntax, shellcheck, macOS discovery, uninstall dry-run, install dry-run, AI tools dry-run, and SSH dry-run on a native macOS runner.
+- Windows job: parses every Windows `.ps1` file with `System.Management.Automation.Language.Parser`, then runs Windows discovery and all uninstall/install dry-runs without `-Execute`.
+
 ## Known Gaps
 
-- Windows PowerShell scripts require a Windows or PowerShell-enabled host for full parse/runtime validation; this Linux environment currently lacks `pwsh`/`powershell`.
-- macOS scripts require a real macOS host for full runtime validation; Linux simulation only proves dry-run branch behavior and OS guards.
+- Local Windows PowerShell scripts require a Windows or PowerShell-enabled host for local parse/runtime validation; this Linux environment currently lacks `pwsh`/`powershell`.
+- Local macOS scripts require a real macOS host for full local runtime validation; Linux simulation only proves dry-run branch behavior and OS guards. PR CI now provides native macOS dry-run coverage.

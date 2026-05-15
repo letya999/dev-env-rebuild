@@ -1,0 +1,106 @@
+name: Platform validation
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+      - feature/os-platform-structure
+
+permissions:
+  contents: read
+
+jobs:
+  ubuntu:
+    name: Ubuntu scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Bash syntax
+        run: bash -n platforms/macos/uninstall/*.sh platforms/macos/install/*.sh platforms/ubuntu/uninstall/*.sh platforms/ubuntu/install/*.sh
+
+      - name: Shellcheck
+        run: shellcheck platforms/macos/uninstall/*.sh platforms/macos/install/*.sh platforms/ubuntu/uninstall/*.sh platforms/ubuntu/install/*.sh
+
+      - name: Ubuntu dry-run
+        run: |
+          ./platforms/ubuntu/uninstall/00_discovery_inventory.sh
+          ./platforms/ubuntu/uninstall/01_uninstall_dev_environment.sh
+          ./platforms/ubuntu/install/01_install_dev_environment.sh
+          ./platforms/ubuntu/install/02_install_ai_tools.sh
+          ./platforms/ubuntu/install/03_ssh_key.sh
+
+  macos:
+    name: macOS scripts
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: brew install shellcheck
+
+      - name: Bash syntax
+        run: bash -n platforms/macos/uninstall/*.sh platforms/macos/install/*.sh
+
+      - name: Shellcheck
+        run: shellcheck platforms/macos/uninstall/*.sh platforms/macos/install/*.sh
+
+      - name: macOS dry-run
+        run: |
+          ./platforms/macos/uninstall/00_discovery_inventory.sh
+          ./platforms/macos/uninstall/01_uninstall_dev_environment.sh
+          ./platforms/macos/install/01_install_dev_environment.sh
+          ./platforms/macos/install/02_install_ai_tools.sh
+          ./platforms/macos/install/03_ssh_key.sh
+
+  windows:
+    name: Windows scripts
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Parse PowerShell scripts
+        run: |
+          $allErrors = @()
+          Get-ChildItem -Path platforms/windows -Filter *.ps1 -Recurse | ForEach-Object {
+            $tokens = $null
+            $parseErrors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$parseErrors) | Out-Null
+            if ($parseErrors) {
+              $allErrors += $parseErrors | ForEach-Object { "$($_.Extent.File):$($_.Extent.StartLineNumber): $($_.Message)" }
+            }
+          }
+          if ($allErrors.Count -gt 0) {
+            $allErrors | ForEach-Object { Write-Error $_ }
+            exit 1
+          }
+
+      - name: Windows discovery and dry-run
+        run: |
+          .\platforms\windows\uninstall\00_discovery_inventory.ps1
+          .\platforms\windows\uninstall\part1_tools\01_python.ps1
+          .\platforms\windows\uninstall\part1_tools\02_git.ps1
+          .\platforms\windows\uninstall\part1_tools\03_docker.ps1
+          .\platforms\windows\uninstall\part1_tools\04_wsl.ps1
+          .\platforms\windows\uninstall\part1_tools\05_js_package_managers.ps1
+          .\platforms\windows\uninstall\part1_tools\06_yandex_chatgpt.ps1
+          .\platforms\windows\uninstall\part2_final\01_claude_deep_clean.ps1
+          .\platforms\windows\uninstall\part2_final\02_codex_deep_clean.ps1
+          .\platforms\windows\uninstall\part2_final\03_node_npm_npx.ps1
+          .\platforms\windows\uninstall\part2_final\04_env_registry_path.ps1
+          .\platforms\windows\install\01_install_dev_environment_demo.ps1
+          .\platforms\windows\install\02_demo_ssh_key_create_and_remove.ps1
+          .\platforms\windows\install\04_install_ai_tools.ps1
+          .\platforms\windows\install\05_ssh_key.ps1

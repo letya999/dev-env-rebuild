@@ -1,6 +1,6 @@
 <!-- Memory Metadata
 Last updated: 2026-05-15
-Last commit: 0b4d41c fix: harden platform environment scripts
+Last commit: 486a0c3 ci: validate platform scripts
 Scope: platforms/windows, platforms/macos, platforms/ubuntu
 Area: CLI
 -->
