@@ -42,4 +42,4 @@ if (-not $SkipYc) {
     Write-Host "  4. Выбери каталог в Яндекс Облаке" -ForegroundColor Yellow
 }
 
-Write-Host "`nГотово. Запусти .\02_install\03_final_check.ps1 для проверки." -ForegroundColor Green
+Write-Host "`nГотово. Запусти .\platforms\windows\install\03_final_check.ps1 для проверки." -ForegroundColor Green

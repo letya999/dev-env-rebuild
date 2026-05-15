@@ -41,4 +41,4 @@ Remove-PathSafe "$env:LOCALAPPDATA\Claude" -DryRun:$DryRun
 # Раскомментировать только если нужна полная очистка:
 # Remove-PathSafe "$env:USERPROFILE\.claude" -DryRun:$DryRun
 Write-Host "  ВНИМАНИЕ: ~/.claude (настройки, MCP) НЕ удаляется автоматически." -ForegroundColor Yellow
-Write-Host "  Для полной очистки добавь -CleanConfig и раскомментируй строку в скрипте." -ForegroundColor Yellow
+Write-Host "  Если нужна ручная очистка ~/.claude, сначала сделай отдельный backup." -ForegroundColor Yellow

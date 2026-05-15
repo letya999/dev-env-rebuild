@@ -22,7 +22,8 @@ Run "Remove codex shims from npm prefix" {
 } -DryRun:$DryRun
 
 Step "Codex данные"
-Remove-PathSafe "$env:USERPROFILE\.codex" -DryRun:$DryRun
 Remove-PathSafe "$env:LOCALAPPDATA\ChatGPT" -DryRun:$DryRun
 Remove-PathSafe "$env:LOCALAPPDATA\Programs\ChatGPT" -DryRun:$DryRun
 Remove-PathSafe "$env:APPDATA\ChatGPT" -DryRun:$DryRun
+Write-Host "  ВНИМАНИЕ: ~/.codex (настройки, MCP, skills, auth cache) НЕ удаляется автоматически." -ForegroundColor Yellow
+Write-Host "  Если нужна ручная очистка ~/.codex, сначала сделай отдельный backup и проверь содержимое." -ForegroundColor Yellow

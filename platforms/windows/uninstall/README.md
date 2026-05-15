@@ -1,12 +1,13 @@
-# 01_uninstall — Модульная очистка
+# Windows uninstall
 
 Я разбил процесс на отдельные скрипты для каждого инструмента. 
-**Встроена защита путей:** скрипты НИКОГДА не удалят файлы внутри `C:\Users\User\a_projects`, `C:\Users\User\.agents` и `C:\Users\User\.ai_backup`.
+**Встроена защита путей:** скрипты не удаляют project roots, `.agents` и `.ai_backup`.
+Список можно расширить через `DEV_ENV_REBUILD_PROTECTED_PATHS` с разделителем `;`.
 
 ## Последовательность выполнения
 
 ### Часть 1: Инструменты (Можно запускать в любом порядке)
-Все скрипты находятся в `01_uninstall/part1_tools/`.
+Все скрипты находятся в `platforms/windows/uninstall/part1_tools/`.
 
 1. `01_python.ps1` — Python, pip, кэши.
 2. `02_git.ps1` — Git, GitHub CLI, .gitconfig.
@@ -16,7 +17,7 @@
 6. `06_yandex_chatgpt.ps1` — Yandex Cloud, ChatGPT.
 
 ### Часть 2: Финал (СТРОГИЙ ПОРЯДОК)
-Все скрипты находятся в `01_uninstall/part2_final/`. Эти скрипты должны запускаться последними.
+Все скрипты находятся в `platforms/windows/uninstall/part2_final/`. Эти скрипты должны запускаться последними.
 
 1. `01_claude_deep_clean.ps1` — Полная очистка Claude (включая глобальные пакеты npm).
 2. `02_codex_deep_clean.ps1` — Полная очистка Codex.
@@ -35,21 +36,21 @@
 
 Пример (тест):
 ```powershell
-.\01_uninstall\part2_final\03_node_npm_npx.ps1
+.\platforms\windows\uninstall\part2_final\03_node_npm_npx.ps1
 ```
 
 Пример (удаление):
 ```powershell
-.\01_uninstall\part2_final\03_node_npm_npx.ps1 -Execute
+.\platforms\windows\uninstall\part2_final\03_node_npm_npx.ps1 -Execute
 ```
 
 ## После удаления
 1. Перезагрузи компьютер.
-2. Запусти `.\01_uninstall\03_post_reboot_check.ps1` для проверки.
+2. Запусти `.\platforms\windows\uninstall\03_post_reboot_check.ps1` для проверки.
 
 ---
 
 ## Что дальше?
 После полной очистки и перезагрузки можно приступать к установке:
-1. Ознакомься с [02_install/README.md](../02_install/README.md).
-2. Следуй общему [MANUAL_SETUP_GUIDE.md](../MANUAL_SETUP_GUIDE.md).
+1. Ознакомься с [../install/README.md](../install/README.md).
+2. Следуй общему [../../../docs/windows/manual-setup-guide.md](../../../docs/windows/manual-setup-guide.md).

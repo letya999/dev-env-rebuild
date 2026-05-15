@@ -1,140 +1,123 @@
 # dev-env-rebuild
 
-PowerShell-скрипты для **полного сброса и восстановления dev-окружения Windows 11** — для демонстрации работы AI CLI-инструментов (Claude Code, Gemini CLI, Codex CLI).
+OS-specific scripts for demonstration rebuilds of local developer environments.
+The repository is intentionally split by operating system so Windows, macOS, and
+Ubuntu can evolve independently without cross-OS conditionals and path noise.
 
-Проект создан для AI Camp: показывает как AI-агент (Gemini CLI или Codex CLI) может управлять реальными системными операциями — удалять, инвентаризировать и переустанавливать dev-стек с нуля.
+The project is built for AI Camp demos: an AI agent first inventories a concrete
+machine, then adapts the local plan, dry-runs destructive steps, and only then
+executes the reset and reinstall flow.
 
-## Что умеет
+## Structure
 
-- **Инвентаризация** — сканирует машину: какие инструменты установлены, откуда, какие версии
-- **Удаление** — убирает Node.js, Python, Git, Docker Desktop, Claude Code, Codex, WSL и связанные PATH/env-записи в правильной последовательности
-- **Установка** — ставит всё обратно через winget и npm
-- **Ручные гайды** — пошаговые инструкции для ручной настройки после скриптов (аккаунты, подписки, Telegram-бот, Яндекс Облако)
+```text
+platforms/
+  windows/
+    uninstall/          Windows PowerShell uninstall flow
+    install/            Windows PowerShell install flow
+  macos/
+    uninstall/          macOS Bash uninstall flow
+    install/            macOS Bash install flow
+  ubuntu/
+    uninstall/          Ubuntu Bash uninstall flow
+    install/            Ubuntu Bash install flow
 
-## Стек
-
-- PowerShell 5.1+ (Windows)
-- winget (Windows Package Manager)
-- Node.js / npm
-- Python 3.12
-- Git, Docker Desktop, WSL2
-- Claude Code CLI, Gemini CLI, Codex CLI
-- yc CLI (Яндекс Облако)
-
-## Структура
-
-```
-01_uninstall/           удаление в правильном порядке
-  00_discovery_inventory.ps1   инвентаризация машины
-  lib.ps1                      общие функции (Get-NpmPrefix и др.)
-  part1_tools/                 удаление инструментов (можно в любом порядке)
-    01_python.ps1
-    02_git.ps1
-    03_docker.ps1
-    04_wsl.ps1
-    05_js_package_managers.ps1
-    06_yandex_chatgpt.ps1
-  part2_final/                 финал (строгий порядок!)
-    01_claude_deep_clean.ps1
-    02_codex_deep_clean.ps1
-    03_node_npm_npx.ps1
-    04_env_registry_path.ps1
-
-02_install/             установка
-  01_install_dev_environment_demo.ps1  базовый стек (Node, Git, Docker, Python)
-  02_demo_ssh_key_create_and_remove.ps1  демо SSH-ключ (создать→показать→удалить)
-  03_final_check.ps1                   проверка всего окружения
-  04_install_ai_tools.ps1              Claude Code CLI, Claude Desktop, yc CLI
-  05_ssh_key.ps1                       постоянный SSH-ключ для Яндекс Облака
-  FULL_MANUAL_GUIDE.md                 полный ручной гайд (без скриптов)
-
-_state/                 генерируется скриптами (в .gitignore)
-  inventory.md
-  inventory.json
-  local_plan.md
-
-MANUAL_SETUP_GUIDE.md   гайд по ручной настройке после скриптов
-AGENTS.md               инструкции для AI-агента
+docs/
+  architecture.md       repository structure and safety contracts
+  research/             source-backed implementation notes
+  windows/              Windows manual guides
 ```
 
-## Быстрый старт
+Generated machine inventory lives under `platforms/<os>/_state/` and is ignored.
 
-Открой PowerShell от имени администратора в корне проекта.
+## Safety Contract
 
-### 1. Инвентаризация (всегда первым шагом)
+- Discovery runs before destructive steps.
+- Destructive scripts are dry-run by default.
+- Windows uses `-Execute`; macOS and Ubuntu use `--execute`.
+- Project directories, `.git` directories, existing SSH keys, and AI config
+  directories (`~/.claude`, `~/.codex`, `~/.gemini`) are not removed
+  automatically.
+- Node/npm removal is last in destructive flows because AI CLIs often depend on
+  Node while the agent is still guiding the process.
+- Reboot or terminal restart checks are required before claiming cleanup is done.
+
+## Windows Quick Start
+
+Run PowerShell as Administrator from the repository root.
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-.\01_uninstall\00_discovery_inventory.ps1
+.\platforms\windows\uninstall\00_discovery_inventory.ps1
+
+# Dry-run first:
+.\platforms\windows\uninstall\part1_tools\01_python.ps1
+.\platforms\windows\uninstall\part1_tools\02_git.ps1
+.\platforms\windows\uninstall\part1_tools\03_docker.ps1
+.\platforms\windows\uninstall\part1_tools\04_wsl.ps1
+.\platforms\windows\uninstall\part1_tools\05_js_package_managers.ps1
+.\platforms\windows\uninstall\part1_tools\06_yandex_chatgpt.ps1
+.\platforms\windows\uninstall\part2_final\01_claude_deep_clean.ps1
+.\platforms\windows\uninstall\part2_final\02_codex_deep_clean.ps1
+.\platforms\windows\uninstall\part2_final\03_node_npm_npx.ps1
+.\platforms\windows\uninstall\part2_final\04_env_registry_path.ps1
+
+# Execute only after inventory/local_plan review:
+.\platforms\windows\uninstall\part1_tools\01_python.ps1 -Execute
 ```
 
-### 2. Dry-run удаления (посмотреть что будет удалено, ничего не трогает)
+After the uninstall flow, reboot Windows and run:
 
 ```powershell
-# Часть 1 — инструменты (порядок не важен):
-.\01_uninstall\part1_tools\01_python.ps1
-.\01_uninstall\part1_tools\02_git.ps1
-.\01_uninstall\part1_tools\03_docker.ps1
-.\01_uninstall\part1_tools\04_wsl.ps1
-.\01_uninstall\part1_tools\05_js_package_managers.ps1
-.\01_uninstall\part1_tools\06_yandex_chatgpt.ps1
-
-# Часть 2 — финал (строгий порядок!):
-.\01_uninstall\part2_final\01_claude_deep_clean.ps1
-.\01_uninstall\part2_final\02_codex_deep_clean.ps1
-.\01_uninstall\part2_final\03_node_npm_npx.ps1
-.\01_uninstall\part2_final\04_env_registry_path.ps1
+.\platforms\windows\uninstall\03_post_reboot_check.ps1
 ```
 
-### 3. Реальное удаление (добавь `-Execute` к каждой команде)
+Install after reboot:
 
 ```powershell
-.\01_uninstall\part1_tools\01_python.ps1 -Execute
-# ... и так далее
+.\platforms\windows\install\01_install_dev_environment_demo.ps1 -Execute
+.\platforms\windows\install\04_install_ai_tools.ps1 -Execute
+.\platforms\windows\install\05_ssh_key.ps1 -Execute
+.\platforms\windows\install\03_final_check.ps1
 ```
 
-### 4. Перезагрузка
+Manual Windows guide: [docs/windows/manual-setup-guide.md](docs/windows/manual-setup-guide.md).
 
-```powershell
-Restart-Computer
+## macOS Quick Start
+
+```bash
+./platforms/macos/uninstall/00_discovery_inventory.sh
+./platforms/macos/uninstall/01_uninstall_dev_environment.sh
+./platforms/macos/uninstall/01_uninstall_dev_environment.sh --execute
+./platforms/macos/uninstall/02_post_uninstall_check.sh
+
+./platforms/macos/install/01_install_dev_environment.sh --execute --install-homebrew
+./platforms/macos/install/02_install_ai_tools.sh --execute
+./platforms/macos/install/03_ssh_key.sh --execute
+./platforms/macos/install/04_final_check.sh
 ```
 
-### 5. Установка после перезагрузки
+## Ubuntu Quick Start
 
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+```bash
+./platforms/ubuntu/uninstall/00_discovery_inventory.sh
+./platforms/ubuntu/uninstall/01_uninstall_dev_environment.sh
+./platforms/ubuntu/uninstall/01_uninstall_dev_environment.sh --execute
+./platforms/ubuntu/uninstall/02_post_uninstall_check.sh
 
-.\02_install\01_install_dev_environment_demo.ps1 -Execute
-# Перезапусти PowerShell после Docker
-
-.\02_install\04_install_ai_tools.ps1 -Execute
-# Перезапусти PowerShell после этого шага
-
-.\02_install\05_ssh_key.ps1 -Execute
+./platforms/ubuntu/install/01_install_dev_environment.sh --execute
+./platforms/ubuntu/install/02_install_ai_tools.sh --execute
+./platforms/ubuntu/install/03_ssh_key.sh --execute
+./platforms/ubuntu/install/04_final_check.sh
 ```
 
-### 6. Ручная донастройка
+Ubuntu intentionally does not purge the OS-critical base `python3` runtime.
 
-Следуй шагам из [MANUAL_SETUP_GUIDE.md](MANUAL_SETUP_GUIDE.md):
-вход в аккаунты, подписки, git identity, yc init, Telegram-бот.
+## References
 
-Или используй полный ручной гайд без скриптов: [02_install/FULL_MANUAL_GUIDE.md](02_install/FULL_MANUAL_GUIDE.md)
+Implementation research and source links are in
+[docs/research/os-tooling-research.md](docs/research/os-tooling-research.md).
 
-## Принцип dry-run
+## License
 
-Все скрипты удаления по умолчанию работают в режиме **dry-run** — только показывают что сделают, ничего не трогают. Для реального выполнения добавь флаг `-Execute`:
-
-```powershell
-.\01_uninstall\part1_tools\01_python.ps1          # dry-run
-.\01_uninstall\part1_tools\01_python.ps1 -Execute  # реальное удаление
-```
-
-## Требования
-
-- Windows 11 (22H2+)
-- PowerShell 5.1+
-- Права администратора для скриптов удаления/установки
-
-## Лицензия
-
-MIT — см. [LICENSE](LICENSE)
+MIT, see [LICENSE](LICENSE).

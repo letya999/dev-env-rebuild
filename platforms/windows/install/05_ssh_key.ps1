@@ -16,8 +16,17 @@ Write-Host "Скрипт создаёт постоянный SSH-ключ для
 if (-not $DryRun) {
     if (Test-Path $KeyPath) {
         Write-Host "`nSSH-ключ уже существует: $KeyPath" -ForegroundColor Yellow
+        if (-not (Test-Path $PubPath)) {
+            Run "Восстановить публичный ключ из существующего приватного ключа" {
+                ssh-keygen -y -f $KeyPath | Set-Content -Path $PubPath -Encoding ascii
+            }
+        }
         Write-Host "Публичный ключ (скопируй в Яндекс Облако):" -ForegroundColor Cyan
-        Get-Content $PubPath
+        if (Test-Path $PubPath) {
+            Get-Content $PubPath
+        } else {
+            Write-Host "Публичный ключ не найден и не был восстановлен автоматически." -ForegroundColor Red
+        }
         Write-Host "`nДля создания НОВОГО ключа сначала удали $KeyPath" -ForegroundColor Red
         return
     }
