@@ -1,13 +1,13 @@
 name: Platform validation
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - main
   push:
     branches:
       - main
-      - feature/os-platform-structure
 
 permissions:
   contents: read

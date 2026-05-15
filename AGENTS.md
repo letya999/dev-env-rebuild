@@ -31,6 +31,10 @@
 - `docs/windows/`;
 - `platforms/<os>/README.md`.
 
+CI validation lives in `.github/workflows/platform-validation.yml` and covers
+native Ubuntu/macOS/Windows dry-run checks when GitHub Actions runners are
+available.
+
 ---
 
 ## Удаляемое окружение

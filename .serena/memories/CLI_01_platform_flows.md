@@ -1,6 +1,6 @@
 <!-- Memory Metadata
 Last updated: 2026-05-15
-Last commit: 486a0c3 ci: validate platform scripts
+Last commit: b32017e Merge platform environment rebuild flows
 Scope: platforms/windows, platforms/macos, platforms/ubuntu
 Area: CLI
 -->
@@ -21,6 +21,7 @@ This memory records the platform CLI flows and safety behavior implemented in th
 - `platforms/ubuntu/uninstall/lib.sh`: Ubuntu dry-run runner, apt purge helper, and safe removal guard.
 - `platforms/macos/install/*.sh` and `platforms/ubuntu/install/*.sh`: OS-specific install flows.
 - `docs/research/os-tooling-research.md`: source-backed package manager and vendor command decisions.
+- `.github/workflows/platform-validation.yml`: native OS dry-run validation workflow.
 
 ## Entry Points
 
@@ -48,6 +49,8 @@ Ubuntu scripts use `apt-get` in scripts, Docker's official apt repository, and `
 
 Yandex Cloud CLI install on macOS/Ubuntu uses `bash -s -- -a` so PATH/completion can be added non-interactively to the default shell rc file.
 
+The repository validates scripts through `.github/workflows/platform-validation.yml` on PRs to `main` and manual dispatch: Ubuntu and macOS dry-runs run on native runners, and Windows scripts are parsed and dry-run on a Windows runner.
+
 ## Contracts And Data
 
 - `DEV_ENV_REBUILD_PROTECTED_PATHS` extends protected removal roots. Windows expects `;`-separated paths; macOS/Ubuntu expect `:`-separated paths.
@@ -63,6 +66,7 @@ Yandex Cloud CLI install on macOS/Ubuntu uses `bash -s -- -a` so PATH/completion
 - Project directories, `.git` directories, existing SSH keys, Git config/credentials, secret env vars, and AI config directories must not be removed without an explicit manual request.
 - Ubuntu base `python3` must not be purged.
 - Third-party apt repository signing keys must be fingerprint-verified before package install.
+- Normal `main` must not track agent-only files such as root `AGENTS.md` or `.serena`; those are synchronized through `fullrepo`.
 
 ## Change Rules
 
@@ -70,17 +74,21 @@ Yandex Cloud CLI install on macOS/Ubuntu uses `bash -s -- -a` so PATH/completion
 - Use `run`, `run_shell`, or PowerShell `Run` wrappers for destructive actions so dry-run behavior stays consistent.
 - Use safe path-removal helpers for user-directory cleanup unless the path is an intentional system tool data directory documented by the platform vendor, such as Docker data under `/var/lib/docker`.
 - Before changing package IDs or installer URLs, update `docs/research/os-tooling-research.md` with source-backed facts.
+- When CI workflow behavior changes, update `README.md` and `TEST_01_quality_gates`.
 
 ## Verification
 
 - `bash -n platforms/macos/uninstall/*.sh platforms/macos/install/*.sh platforms/ubuntu/uninstall/*.sh platforms/ubuntu/install/*.sh`: validates Bash syntax.
 - `shellcheck platforms/macos/uninstall/*.sh platforms/macos/install/*.sh platforms/ubuntu/uninstall/*.sh platforms/ubuntu/install/*.sh`: validates shell quality.
+- `actionlint .github/workflows/platform-validation.yml`: validates GitHub Actions syntax and semantics.
 - `git diff --check`: validates diff hygiene.
 - macOS dry-run can be simulated on Linux by shadowing `uname`, `sw_vers`, and `brew`; this validates dry-run output and OS-guard behavior but is not a real macOS runtime test.
 - Ubuntu discovery, uninstall dry-run, install dry-run, AI install dry-run, and SSH dry-run are run without `--execute` on an Ubuntu host.
 - `command -v pwsh || command -v powershell` checks whether Windows PowerShell validation can be run from the current host.
+- GitHub Actions validates native runners when Actions can start; current runner startup is externally blocked by GitHub billing status.
 
 ## Known Gaps
 
-- PowerShell parse/runtime validation was not run in the Linux development environment because `pwsh`/`powershell` was not installed.
-- macOS scripts were syntax-checked, shellchecked, and simulated in dry-run on Linux but not executed on a real macOS host.
+- Local PowerShell parse/runtime validation was not run in the Linux development environment because `pwsh`/`powershell` was not installed.
+- Local macOS scripts were syntax-checked, shellchecked, and simulated in dry-run on Linux but not executed on a real macOS host.
+- Current GitHub Actions runs failed before any workflow step because GitHub reported the account is locked due to a billing issue.
