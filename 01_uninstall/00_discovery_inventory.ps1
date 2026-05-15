@@ -1,17 +1,17 @@
 #requires -version 5.1
 <#
-Скрипт инвентаризации (УСИЛЕННЫЙ). Ничего не удаляет.
-Собирает версии, пути, PATH/env, установленные приложения, WSL, реестр и службы.
+Inventory Script (STRENGTHENED). Deletes nothing.
+Collects versions, paths, PATH/env, installed apps, WSL, registry and services.
 #>
 
 $ErrorActionPreference = "Continue"
 $Root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $StateDir = Join-Path $Root "_state"
-if (-not (Test-Path $StateDir)) { New-Item -ItemType Directory -Path $StateDir -Force | Out-Null }
-
 $InventoryJson = Join-Path $StateDir "inventory.json"
 $InventoryMd = Join-Path $StateDir "inventory.md"
 $LocalPlan = Join-Path $StateDir "local_plan.md"
+
+if (-not (Test-Path $StateDir)) { New-Item -ItemType Directory -Path $StateDir -Force | Out-Null }
 
 function Get-CommandInfoSafe {
     param([string]$Name, [string[]]$VersionArgs = @("--version"))
@@ -127,15 +127,14 @@ $commands = @(
 )
 
 $wslDistrosRaw = @()
-try { 
-    # Исправляем баг с дублированием/кодировкой WSL
+try {
     $wslDistrosRaw = (wsl.exe --list --verbose | Out-String) -split "`n" | Where-Object { $_ -and $_.Trim() -ne "" }
     $wslDistrosRaw = $wslDistrosRaw | ForEach-Object { $_ -replace '\x00', '' }
 } catch { $wslDistrosRaw = @("WSL unavailable") }
 
 $apps = Get-InstalledApps
 $interestingApps = $apps | Where-Object {
-    $_.DisplayName -match "Node|Python|Git|GitHub|Docker|WSL|Ubuntu|Debian|ChatGPT|Codex|Gemini|Bun|Claude|Yandex|Visual Studio Code|Cursor"
+    $_.DisplayName -match "Node|Python|Git|GitHub|Docker|WSL|Ubuntu|Debian|ChatGPT|Codex|Gemini|Bun|Claude|Yandex|Visual Studio Code|Cursor"        
 }
 
 $envInteresting = Get-ChildItem Env: | Where-Object {
@@ -173,7 +172,9 @@ foreach ($c in $commands) {
 }
 $md += ""
 $md += "## WSL"
-$md += "```text`n$($wslDistrosRaw -join "`n")`n```"
+$md += "```text"
+foreach ($line in $wslDistrosRaw) { $md += $line }
+$md += "```"
 $md += ""
 $md += "## Services"
 foreach ($s in $inventory.services) { $md += "- $($s.Name): $($s.Status)" }
@@ -189,25 +190,24 @@ foreach ($e in $inventory.interestingEnv) { $md += "- $($e.Name) = $($e.Value)" 
 
 $md | Set-Content -Path $InventoryMd -Encoding UTF8
 
-# Создать local_plan.md с шаблоном, если не существует
 if (-not (Test-Path $LocalPlan)) {
     $npmPrefixDetected = try { (& npm config get prefix 2>$null) } catch { "not found" }
     @(
-        "# Локальный план адаптации",
+        "# Local Adaptation Plan",
         "",
-        "Сгенерирован: $((Get-Date).ToString('s'))",
+        "Generated: $((Get-Date).ToString('s'))",
         "",
-        "## Инструкция для агента",
-        "Этот файл должен быть заполнен агентом (Gemini/Codex) после анализа inventory.md.",
-        "Опиши здесь: что нестандартно, какие пути отличаются от дефолтных, что нужно адаптировать.",
+        "## Instruction for Agent",
+        "This file should be filled by the agent (Gemini/Codex) after analyzing inventory.md.",
+        "Describe here: what is non-standard, which paths differ from defaults, what needs to be adapted.",
         "",
         "## npm global prefix",
         "npm config get prefix: $npmPrefixDetected",
         "",
-        "## Статус инструментов",
-        "Заполнить по inventory.md"
+        "## Tools Status",
+        "Fill based on inventory.md"
     ) | Set-Content -Path $LocalPlan -Encoding UTF8
-    Write-Host "local_plan.md создан/обновлён: $LocalPlan" -ForegroundColor Green
+    Write-Host "local_plan.md created/updated: $LocalPlan" -ForegroundColor Green
 }
 
 Write-Host "Inventory complete. Files created in _state/" -ForegroundColor Green

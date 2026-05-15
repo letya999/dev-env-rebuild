@@ -7,7 +7,7 @@
 
 ---
 **ЧТО ДЕЛАЮТ СКРИПТЫ АВТОМАТИЧЕСКИ (делать не нужно):**
-- Устанавливают: Node.js LTS, Git, Docker Desktop, Python 3.12
+- Устанавливают: Node.js LTS, Git (https://gitforwindows.org), Docker Desktop, Python 3.12
 - Устанавливают: Claude Code CLI, Claude Desktop (winget)
 - Устанавливают: yc CLI (Яндекс Облако)
 - Генерируют SSH-ключ (`~/.ssh/id_ed25519`)
