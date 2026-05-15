@@ -48,7 +48,7 @@ Windows-реализация целится в:
 
 macOS-реализация целится в:
 
-- Homebrew-пакеты `git`, `python@3.12`, Docker Desktop cask, ChatGPT cask при наличии;
+- Homebrew-пакеты `git`, текущий default `python`, legacy Python formulae при наличии, Docker Desktop cask, ChatGPT cask при наличии;
 - Node/npm через `nvm` и npm global tools;
 - user-level Python/npm/cache/tooling tails;
 - Claude Code, Codex CLI, Gemini CLI, yc CLI;
@@ -59,7 +59,8 @@ Ubuntu-реализация целится в:
 - Node/npm через `nvm` и npm global tools;
 - user-level Python/npm/cache/tooling tails;
 - Docker Engine/Desktop packages and data;
-- Git package/config tails where applicable;
+- Git package tails where applicable, while preserving user Git config and
+  credential stores by default;
 - Claude Code, Codex CLI, Gemini CLI, yc CLI.
 
 Ubuntu uninstall **не удаляет базовый `python3` ОС**, потому что он является системной зависимостью. Разрешено удалять только dev-пакеты вроде `python3-pip`, `python3-venv`, `python3-dev` и пользовательские хвосты.
@@ -71,6 +72,10 @@ Ubuntu uninstall **не удаляет базовый `python3` ОС**, пото
 - папки проектов пользователя;
 - `.git` внутри проектов;
 - существующие SSH-ключи пользователя;
+- Git user config and credential stores (`~/.gitconfig`, `~/.git-credentials`,
+  Git Credential Manager data) без отдельного explicit cleanup-запроса;
+- secret environment variables (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`,
+  `YC_TOKEN`) без отдельного explicit cleanup-запроса;
 - Gemini CLI configs (`~/.gemini`) без отдельного запроса;
 - Claude/Codex configs (`~/.claude`, `~/.codex`) без отдельного backup/inspection шага;
 - VS Code, Cursor, Windsurf и другие редакторы;

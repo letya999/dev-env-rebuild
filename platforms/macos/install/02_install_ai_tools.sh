@@ -52,6 +52,6 @@ load_nvm='export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/n
 [ "$SKIP_GEMINI" = "1" ] || run_shell 'npm install -g @google/gemini-cli' \
   "$load_nvm; npm install -g @google/gemini-cli"
 [ "$SKIP_YC" = "1" ] || run_shell 'Install Yandex Cloud CLI' \
-  'curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash'
+  'curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash -s -- -a'
 
 printf '\nRestart the terminal after execute mode, then run ./platforms/macos/install/04_final_check.sh\n'

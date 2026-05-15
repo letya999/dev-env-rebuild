@@ -7,7 +7,7 @@
 
 ---
 **ЧТО ДЕЛАЮТ СКРИПТЫ АВТОМАТИЧЕСКИ (делать не нужно):**
-- Устанавливают: Node.js LTS, Git (https://gitforwindows.org), Docker Desktop, Python 3.12
+- Устанавливают: Node.js LTS, Git (https://gitforwindows.org), Docker Desktop, Python 3.14
 - Устанавливают: Claude Code CLI, Claude Desktop (winget)
 - Устанавливают: yc CLI (Яндекс Облако)
 - Генерируют SSH-ключ (`~/.ssh/id_ed25519`)
@@ -57,7 +57,8 @@ gemini --version
 
 ## Шаг 1: Git — настройка identity
 
-После переустановки Git теряет имя и email. Настрой сразу:
+Git-конфиг сохраняется скриптами, но после переустановки проверь identity.
+Если имя или email отсутствуют, задай их:
 
 ```powershell
 git config --global user.name "Твоё Имя Фамилия"

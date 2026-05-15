@@ -1,5 +1,5 @@
 #requires -version 5.1
-param([switch]$Execute)
+param([switch]$Execute, [switch]$RemoveSecrets)
 $DryRun = -not $Execute
 . (Join-Path $PSScriptRoot "..\lib.ps1")
 
@@ -11,12 +11,28 @@ Run "Cleanup Registry" {
     Remove-Item "HKLM:\SOFTWARE\Node.js" -Recurse -Force -ErrorAction SilentlyContinue
 } -DryRun:$DryRun
 
-$vars = @("NODE_PATH", "NPM_CONFIG_PREFIX", "PYTHONPATH", "PY_PYTHON", "PNPM_HOME", "BUN_INSTALL", "YC_TOKEN", "ANTHROPIC_API_KEY")
+$vars = @("NODE_PATH", "NPM_CONFIG_PREFIX", "PYTHONPATH", "PY_PYTHON", "PNPM_HOME", "BUN_INSTALL")
 foreach ($v in $vars) {
     Run "Delete ENV $v" {
         [Environment]::SetEnvironmentVariable($v, $null, "User")
         [Environment]::SetEnvironmentVariable($v, $null, "Machine")
     } -DryRun:$DryRun
+}
+
+$secretVars = @("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "YC_TOKEN")
+foreach ($v in $secretVars) {
+    if ($RemoveSecrets) {
+        Run "Delete secret ENV $v" {
+            [Environment]::SetEnvironmentVariable($v, $null, "User")
+            [Environment]::SetEnvironmentVariable($v, $null, "Machine")
+        } -DryRun:$DryRun
+    } else {
+        $hasUser = [Environment]::GetEnvironmentVariable($v, "User")
+        $hasMachine = [Environment]::GetEnvironmentVariable($v, "Machine")
+        if ($hasUser -or $hasMachine) {
+            Write-Host "Preserved secret ENV $v. Add -RemoveSecrets to delete it explicitly." -ForegroundColor Yellow
+        }
+    }
 }
 
 function Normalize-PathText($Path) {

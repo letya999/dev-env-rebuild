@@ -107,13 +107,43 @@ function Remove-PathSafe($Path, [switch]$DryRun) {
     } -DryRun:$DryRun
 }
 
+function Invoke-WingetIfAvailable([scriptblock]$Action) {
+    if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+        Write-Host "  winget not found, skipped" -ForegroundColor Yellow
+        return
+    }
+    & $Action
+}
+
+function WingetUninstallById($Id, [switch]$DryRun) {
+    Run "winget uninstall --id $Id -e --source winget" {
+        Invoke-WingetIfAvailable {
+            winget uninstall --id "$Id" -e --source winget --silent --accept-source-agreements --disable-interactivity
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host "  winget did not uninstall '$Id' (not installed or installer returned non-zero)" -ForegroundColor Gray
+            }
+        }
+    } -DryRun:$DryRun
+}
+
+function WingetUninstallByName($Name, [switch]$DryRun) {
+    Run "winget uninstall --name '$Name'" {
+        Invoke-WingetIfAvailable {
+            winget uninstall --name "$Name" --silent --accept-source-agreements --disable-interactivity
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host "  winget did not uninstall '$Name' (not installed, ambiguous, or installer returned non-zero)" -ForegroundColor Gray
+            }
+        }
+    } -DryRun:$DryRun
+}
+
 function WingetUninstall($Name, [switch]$DryRun) {
-    Run "winget uninstall '$Name'" {
+    Run "winget uninstall --name '$Name'" {
         if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
             Write-Host "  winget not found, skipped" -ForegroundColor Yellow
             return
         }
-        winget uninstall --name $Name --silent --accept-source-agreements
+        winget uninstall --name "$Name" --silent --accept-source-agreements --disable-interactivity
         if ($LASTEXITCODE -ne 0) {
             Write-Host "  winget did not uninstall '$Name' (not installed or installer returned non-zero)" -ForegroundColor Gray
         }

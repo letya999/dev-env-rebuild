@@ -46,6 +46,7 @@ remove_path_safe "$HOME/.docker/desktop"
 run 'Remove /usr/local/bin/com.docker.cli' sudo rm -f /usr/local/bin/com.docker.cli
 run 'Remove /var/lib/docker' sudo rm -rf /var/lib/docker
 run 'Remove /var/lib/containerd' sudo rm -rf /var/lib/containerd
+printf 'Docker config file %s/.docker/config.json is not edited automatically; remove Docker Desktop credsStore/currentContext manually if needed.\n' "$HOME"
 
 step 'Node.js through nvm and user npm data'
 remove_path_safe "$HOME/.nvm"
@@ -66,8 +67,7 @@ remove_path_safe "$HOME/.pyenv"
 
 step 'Git and GitHub CLI'
 apt_purge gh git
-remove_path_safe "$HOME/.gitconfig"
-remove_path_safe "$HOME/.git-credentials"
+printf 'Git user config and credential stores are preserved: %s/.gitconfig, %s/.git-credentials.\n' "$HOME" "$HOME"
 
 step 'Yandex Cloud CLI'
 remove_path_safe "$HOME/yandex-cloud"

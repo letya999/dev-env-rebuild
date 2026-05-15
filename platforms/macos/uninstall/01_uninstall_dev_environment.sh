@@ -68,14 +68,15 @@ remove_path_safe "$HOME/Library/Caches/pip"
 remove_path_safe "$HOME/.cache/pip"
 remove_path_safe "$HOME/Library/Python"
 remove_path_safe "$HOME/.pyenv"
+brew_uninstall_formula python@3.14
+brew_uninstall_formula python@3.13
 brew_uninstall_formula python@3.12
 brew_uninstall_formula python
 
 step 'Git and GitHub CLI'
 brew_uninstall_formula gh
 brew_uninstall_formula git
-remove_path_safe "$HOME/.gitconfig"
-remove_path_safe "$HOME/.git-credentials"
+printf 'Git user config and credential stores are preserved: %s/.gitconfig, %s/.git-credentials.\n' "$HOME" "$HOME"
 
 step 'Yandex Cloud CLI'
 remove_path_safe "$HOME/yandex-cloud"

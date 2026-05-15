@@ -8,6 +8,47 @@ function Run($Command, [scriptblock]$Action) {
     else { Write-Host "Выполняю: $Command" -ForegroundColor Green; & $Action }
 }
 
+function WingetInstall($Id, $Name) {
+    Run "winget install --id $Id -e --source winget ($Name)" {
+        if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+            throw "winget не найден. Установи/обнови App Installer из Microsoft Store."
+        }
+        winget install --id "$Id" -e --source winget --silent --accept-package-agreements --accept-source-agreements --disable-interactivity
+        if ($LASTEXITCODE -ne 0) {
+            throw "winget install failed for $Id with exit code $LASTEXITCODE"
+        }
+    }
+}
+
+function Add-UserPathEntry($PathEntry) {
+    $current = [Environment]::GetEnvironmentVariable("Path", "User")
+    $parts = @()
+    if ($current) {
+        $parts = $current -split ';' | Where-Object { $_ -and $_.Trim() -ne "" }
+    }
+    if ($parts -notcontains $PathEntry) {
+        $next = (@($parts) + $PathEntry) -join ';'
+        [Environment]::SetEnvironmentVariable("Path", $next, "User")
+        $env:Path = "$env:Path;$PathEntry"
+    }
+}
+
+function Install-YandexCloudCli {
+    $arch = if ([Environment]::Is64BitOperatingSystem) { "amd64" } else { "386" }
+    $installDir = Join-Path $env:USERPROFILE "yandex-cloud\bin"
+    $zipPath = Join-Path $env:TEMP "yc_windows_$arch.zip"
+    $downloadUrl = "https://storage.yandexcloud.net/yandexcloud-yc/release/yc_windows_$arch.zip"
+
+    Run "Download and install yc CLI from $downloadUrl" {
+        New-Item -ItemType Directory -Path $installDir -Force | Out-Null
+        Invoke-WebRequest -Uri $downloadUrl -OutFile $zipPath
+        Expand-Archive -Path $zipPath -DestinationPath $installDir -Force
+        Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
+        Add-UserPathEntry $installDir
+        & (Join-Path $installDir "yc.exe") version
+    }
+}
+
 Write-Host "Режим: $(if ($DryRun) { 'DRY-RUN' } else { 'EXECUTE' })" -ForegroundColor Magenta
 
 # --- Claude Code CLI ---
@@ -16,25 +57,19 @@ if (-not $SkipClaude) {
     Write-Host "  Устанавливается через winget (Anthropic.ClaudeCode)." -ForegroundColor Gray
     Write-Host "  Бинарник попадёт в: AppData\Local\Microsoft\WinGet\Links\claude.exe" -ForegroundColor Gray
     Write-Host "  Альтернатива через PS1-инсталлер: irm https://claude.ai/install.ps1 | iex" -ForegroundColor Gray
-    Run "winget install --id Anthropic.ClaudeCode" {
-        winget install --id Anthropic.ClaudeCode --silent --accept-package-agreements --accept-source-agreements
-    }
+    WingetInstall "Anthropic.ClaudeCode" "Claude Code CLI"
     Step "Claude Desktop (GUI-приложение)"
-    Run "winget install --id Anthropic.Claude" {
-        winget install --id Anthropic.Claude --silent --accept-package-agreements --accept-source-agreements
-    }
+    WingetInstall "Anthropic.Claude" "Claude Desktop"
     Step "Проверка Claude Code CLI"
     Run "claude --version" { claude --version }
 }
 
 # --- yc CLI (Yandex Cloud) ---
 if (-not $SkipYc) {
-    Step "yc CLI (Yandex Cloud) — установка через PowerShell-скрипт"
-    Write-Host "  Нет winget-пакета. Официальный способ — скрипт от Яндекса." -ForegroundColor Gray
+    Step "yc CLI (Yandex Cloud) — установка без интерактивного install.ps1"
+    Write-Host "  Нет winget-пакета. Используется официальный zip-релиз Яндекса для Windows." -ForegroundColor Gray
     Write-Host "  После установки: перезапусти PowerShell, затем выполни 'yc init'" -ForegroundColor Gray
-    Run "Install yc CLI from storage.yandexcloud.net" {
-        iex (New-Object System.Net.WebClient).DownloadString('https://storage.yandexcloud.net/yandexcloud-yc/install.ps1')
-    }
+    Install-YandexCloudCli
     Write-Host "`nПосле установки yc CLI:" -ForegroundColor Yellow
     Write-Host "  1. Закрой и открой PowerShell" -ForegroundColor Yellow
     Write-Host "  2. Выполни: yc init" -ForegroundColor Yellow

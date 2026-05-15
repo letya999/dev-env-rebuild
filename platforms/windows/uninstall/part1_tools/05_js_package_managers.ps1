@@ -29,7 +29,7 @@ Remove-PathSafe "$env:APPDATA\pnpm" -DryRun:$DryRun
 Remove-PathSafe "$env:USERPROFILE\.pnpmrc" -DryRun:$DryRun
 
 Step "Bun Uninstallation"
-WingetUninstall "Bun" -DryRun:$DryRun
+WingetUninstallById "Oven-sh.Bun" -DryRun:$DryRun
 Remove-PathSafe "$env:USERPROFILE\.bun" -DryRun:$DryRun
 
 Step "Turbo cache"

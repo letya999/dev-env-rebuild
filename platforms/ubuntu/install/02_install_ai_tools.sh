@@ -53,13 +53,13 @@ load_nvm='export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/n
 
 if [ "$SKIP_CLAUDE" = "0" ]; then
   run_shell 'Install Claude Code through official apt repository' \
-    'sudo install -d -m 0755 /etc/apt/keyrings && sudo curl -fsSL https://downloads.claude.ai/keys/claude-code.asc -o /etc/apt/keyrings/claude-code.asc && echo "deb [signed-by=/etc/apt/keyrings/claude-code.asc] https://downloads.claude.ai/claude-code/apt/stable stable main" | sudo tee /etc/apt/sources.list.d/claude-code.list >/dev/null && sudo apt-get update && sudo apt-get install -y claude-code'
+    'set -e; sudo install -d -m 0755 /etc/apt/keyrings; sudo curl -fsSL https://downloads.claude.ai/keys/claude-code.asc -o /etc/apt/keyrings/claude-code.asc; sudo chmod a+r /etc/apt/keyrings/claude-code.asc; gpg --show-keys --with-colons /etc/apt/keyrings/claude-code.asc | grep -q "fpr:::::::::31DDDE24DDFAB679F42D7BD2BAA929FF1A7ECACE:"; echo "deb [signed-by=/etc/apt/keyrings/claude-code.asc] https://downloads.claude.ai/claude-code/apt/stable stable main" | sudo tee /etc/apt/sources.list.d/claude-code.list >/dev/null; sudo apt-get update; sudo apt-get install -y claude-code'
 fi
 [ "$SKIP_CODEX" = "1" ] || run_shell 'npm install -g @openai/codex' \
   "$load_nvm; npm install -g @openai/codex"
 [ "$SKIP_GEMINI" = "1" ] || run_shell 'npm install -g @google/gemini-cli' \
   "$load_nvm; npm install -g @google/gemini-cli"
 [ "$SKIP_YC" = "1" ] || run_shell 'Install Yandex Cloud CLI' \
-  'curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash'
+  'curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash -s -- -a'
 
 printf '\nRestart the shell after execute mode, then run ./platforms/ubuntu/install/04_final_check.sh\n'

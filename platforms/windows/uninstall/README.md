@@ -10,11 +10,11 @@
 Все скрипты находятся в `platforms/windows/uninstall/part1_tools/`.
 
 1. `01_python.ps1` — Python, pip, кэши.
-2. `02_git.ps1` — Git, GitHub CLI, .gitconfig.
+2. `02_git.ps1` — Git, GitHub CLI; user Git config/credentials are preserved.
 3. `03_docker.ps1` — Docker Desktop и все данные.
 4. `04_wsl.ps1` — WSL дистрибутивы и компоненты.
 5. `05_js_package_managers.ps1` — Bun, Yarn, PNPM, Turbo.
-6. `06_yandex_chatgpt.ps1` — Yandex Cloud, ChatGPT.
+6. `06_yandex_chatgpt.ps1` — Yandex Cloud, OpenAI Codex / ChatGPT app tails.
 
 ### Часть 2: Финал (СТРОГИЙ ПОРЯДОК)
 Все скрипты находятся в `platforms/windows/uninstall/part2_final/`. Эти скрипты должны запускаться последними.
@@ -23,6 +23,8 @@
 2. `02_codex_deep_clean.ps1` — Полная очистка Codex.
 3. `03_node_npm_npx.ps1` — Строгая последовательность: сначала удаление npm, затем npx, и в конце снос Node.js.
 4. `04_env_registry_path.ps1` — Финальная очистка Реестра, Переменных окружения и PATH.
+   Secret env vars (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `YC_TOKEN`) are preserved
+   by default; delete them only with explicit `-RemoveSecrets`.
 
 ---
 

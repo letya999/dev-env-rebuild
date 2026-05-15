@@ -4,7 +4,7 @@ set -euo pipefail
 
 DRY_RUN=1
 INSTALL_DOCKER=1
-NVM_INSTALL_VERSION="${NVM_INSTALL_VERSION:-v0.40.3}"
+NVM_INSTALL_VERSION="${NVM_INSTALL_VERSION:-v0.40.4}"
 
 for arg in "$@"; do
   case "$arg" in
@@ -58,7 +58,7 @@ if [ "$INSTALL_DOCKER" = "1" ]; then
   step 'Docker Engine from official Docker apt repository'
   # shellcheck disable=SC2016
   run_shell 'Install Docker apt repository key and source' \
-    'sudo install -m 0755 -d /etc/apt/keyrings && sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && sudo chmod a+r /etc/apt/keyrings/docker.asc && echo "Types: deb
+    'sudo install -m 0755 -d /etc/apt/keyrings && sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && sudo chmod a+r /etc/apt/keyrings/docker.asc && gpg --show-keys --with-colons /etc/apt/keyrings/docker.asc | grep -q "fpr:::::::::9DC858229FC7DD38854AE2D88D81803C0EBFCD88:" && echo "Types: deb
 URIs: https://download.docker.com/linux/ubuntu
 Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
 Components: stable

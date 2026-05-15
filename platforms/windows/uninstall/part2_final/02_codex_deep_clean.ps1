@@ -4,7 +4,8 @@ $DryRun = -not $Execute
 . (Join-Path $PSScriptRoot "..\lib.ps1")
 
 Step "Codex Deep Clean"
-WingetUninstall "ChatGPT" -DryRun:$DryRun
+WingetUninstallById "OpenAI.Codex" -DryRun:$DryRun
+WingetUninstallByName "ChatGPT" -DryRun:$DryRun
 
 Step "Codex — npm uninstall (пакет @openai/codex)"
 Run "npm uninstall -g @openai/codex" {

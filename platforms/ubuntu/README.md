@@ -7,9 +7,19 @@ Run commands from the repository root.
 
 ## Flow
 
+Dry-run first:
+
 ```bash
 ./platforms/ubuntu/uninstall/00_discovery_inventory.sh
 ./platforms/ubuntu/uninstall/01_uninstall_dev_environment.sh
+./platforms/ubuntu/install/01_install_dev_environment.sh
+./platforms/ubuntu/install/02_install_ai_tools.sh
+./platforms/ubuntu/install/03_ssh_key.sh
+```
+
+Execute only after reviewing generated `_state` files and dry-run output:
+
+```bash
 ./platforms/ubuntu/uninstall/01_uninstall_dev_environment.sh --execute
 ./platforms/ubuntu/uninstall/02_post_uninstall_check.sh
 

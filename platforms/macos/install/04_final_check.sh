@@ -2,6 +2,11 @@
 
 set -euo pipefail
 
+if [ "$(uname -s)" != "Darwin" ]; then
+  printf 'ERROR: this script is intended for macOS only.\n' >&2
+  exit 1
+fi
+
 required=(node npm git python3 docker claude)
 optional=(npx codex gemini yc)
 

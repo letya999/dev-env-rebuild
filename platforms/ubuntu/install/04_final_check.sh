@@ -2,6 +2,18 @@
 
 set -euo pipefail
 
+if [ ! -r /etc/os-release ]; then
+  printf 'ERROR: cannot detect OS; /etc/os-release is missing.\n' >&2
+  exit 1
+fi
+
+# shellcheck disable=SC1091
+. /etc/os-release
+if [ "${ID:-}" != "ubuntu" ]; then
+  printf 'ERROR: this script is intended for Ubuntu only; detected %s.\n' "${PRETTY_NAME:-unknown}" >&2
+  exit 1
+fi
+
 required=(node npm git python3 docker claude)
 optional=(npx codex gemini yc)
 

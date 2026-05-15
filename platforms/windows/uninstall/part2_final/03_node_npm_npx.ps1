@@ -39,7 +39,7 @@ Remove-PathSafe $npmPrefix -DryRun:$DryRun
 Remove-PathSafe "$env:APPDATA\npm" -DryRun:$DryRun
 
 Step "Node.js — winget uninstall"
-WingetUninstall "Node.js" -DryRun:$DryRun
+WingetUninstallById "OpenJS.NodeJS.LTS" -DryRun:$DryRun
 
 Step "Node.js — файловые остатки"
 Remove-PathSafe "C:\Program Files\nodejs" -DryRun:$DryRun

@@ -13,6 +13,18 @@ function Run($Command, [scriptblock]$Action) {
 
 Write-Host "Скрипт создаёт постоянный SSH-ключ для подключения к серверам Яндекс Облака." -ForegroundColor Cyan
 
+if ($DryRun) {
+    if (Test-Path $KeyPath) {
+        Write-Host "DRY-RUN: SSH-ключ уже существует: $KeyPath" -ForegroundColor Yellow
+        if (-not (Test-Path $PubPath)) {
+            Write-Host "DRY-RUN: публичный ключ был бы восстановлен из приватного ключа." -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "DRY-RUN: был бы создан SSH-ключ: $KeyPath" -ForegroundColor Yellow
+    }
+    return
+}
+
 if (-not $DryRun) {
     if (Test-Path $KeyPath) {
         Write-Host "`nSSH-ключ уже существует: $KeyPath" -ForegroundColor Yellow

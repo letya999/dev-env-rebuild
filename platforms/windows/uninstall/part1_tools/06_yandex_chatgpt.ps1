@@ -4,8 +4,9 @@ $DryRun = -not $Execute
 . (Join-Path $PSScriptRoot "..\lib.ps1")
 
 Step "Cloud & Other AI Tools Uninstallation"
-WingetUninstall "ChatGPT" -DryRun:$DryRun
-WingetUninstall "Yandex Cloud CLI" -DryRun:$DryRun
+WingetUninstallById "OpenAI.Codex" -DryRun:$DryRun
+WingetUninstallByName "ChatGPT" -DryRun:$DryRun
+WingetUninstallByName "Yandex Cloud CLI" -DryRun:$DryRun
 
 Remove-PathSafe "$env:USERPROFILE\yandex-cloud" -DryRun:$DryRun
 Remove-PathSafe "$env:APPDATA\yc" -DryRun:$DryRun
